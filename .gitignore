@@ -12,3 +12,6 @@ env/
 
 # Fichiers de système
 .DS_Store
+
+# Pour les variables d'envir
+.env
