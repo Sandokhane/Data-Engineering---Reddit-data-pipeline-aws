@@ -1,0 +1,14 @@
+# Fichiers générés par Airflow
+logs/
+dags/
+plugins/
+__pycache__/
+*.pyc
+*.pyo
+
+# Environnement virtuel Python
+env/
+*.env
+
+# Fichiers de système
+.DS_Store
