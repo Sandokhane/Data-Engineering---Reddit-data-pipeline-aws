@@ -20,3 +20,17 @@ Extract data from Reddit using its API. Store the raw data into an S3 bucket fro
 5.	AWS Glue: Data cataloging and ETL jobs.
 6.	Amazon Athena: SQL-based data transformation.
 7.	Amazon Redshift: Data warehousing and analytics.
+
+
+### Remarque
+
+### Configuration des variables d'environnement
+
+Avant d'exécuter ce projet, vous devez créer un fichier `.env` à la racine du projet, en vous basant sur le fichier `.env.example` fourni.
+
+Voici les étapes à suivre :
+
+1. Copiez le fichier `.env.example` :
+   ```bash
+   cp .env.example .env
+2. Remplissez le fichier .env avec vos propres identifiants API Reddit. Vous pouvez obtenir ces identifiants en créant une application Reddit sur Reddit Apps.
