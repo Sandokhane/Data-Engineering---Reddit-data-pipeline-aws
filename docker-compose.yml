@@ -1,0 +1,54 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres_db_volume:/var/lib/postgresql/data
+
+  redis:
+    image: redis:latest
+
+  airflow-webserver:
+    image: apache/airflow:2.3.0
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__FERNET_KEY=$(AIRFLOW__CORE__FERNET_KEY)
+    env_file:
+      - ./airflow.env  # Fichier pour les variables d'environnement
+    volumes:
+      - ./dags:/opt/airflow/dags  # Ton répertoire de DAGs
+      - ./logs:/opt/airflow/logs  # Logs des tâches Airflow
+      - ./plugins:/opt/airflow/plugins  # Plugins si tu en ajoutes
+      - ./requirements.txt:/requirements.txt  # Montre le fichier requirements.txt
+    ports:
+      - "8080:8080"  # Expose le port pour accéder à l'interface web Airflow
+    command: >
+      bash -c "pip install -r /requirements.txt && airflow webserver"
+
+  airflow-scheduler:
+    image: apache/airflow:2.3.0
+    depends_on:
+      - airflow-webserver
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+    env_file:
+      - ./airflow.env
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./requirements.txt:/requirements.txt
+    command: airflow scheduler
+
+volumes:
+  postgres_db_volume:
