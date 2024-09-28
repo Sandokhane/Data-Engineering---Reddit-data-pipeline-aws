@@ -1,6 +1,5 @@
 # Fichiers générés par Airflow
 logs/
-dags/
 plugins/
 __pycache__/
 *.pyc
@@ -8,6 +7,8 @@ __pycache__/
 
 # Environnement virtuel Python
 env/
+airflow_venv/
+venv/
 *.env
 
 # Fichiers de système
@@ -15,3 +16,5 @@ env/
 
 # Pour les variables d'envir
 .env
+
+
