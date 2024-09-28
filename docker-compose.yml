@@ -23,14 +23,14 @@ services:
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
       - AIRFLOW__CORE__FERNET_KEY=$(AIRFLOW__CORE__FERNET_KEY)
     env_file:
-      - ./airflow.env  # Fichier pour les variables d'environnement
+      - ./airflow.env
     volumes:
-      - ./dags:/opt/airflow/dags  # Ton répertoire de DAGs
-      - ./logs:/opt/airflow/logs  # Logs des tâches Airflow
-      - ./plugins:/opt/airflow/plugins  # Plugins si tu en ajoutes
-      - ./requirements.txt:/requirements.txt  # Montre le fichier requirements.txt
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./requirements.txt:/requirements.txt
     ports:
-      - "8080:8080"  # Expose le port pour accéder à l'interface web Airflow
+      - "8080:8080"
     command: >
       bash -c "pip install -r /requirements.txt && airflow webserver"
 

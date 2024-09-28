@@ -1,3 +1,6 @@
-apache-airflow==2.3.0  # Ou la version d'Airflow que tu utilises
-praw
+praw==7.7.1
+python-dotenv==0.21.1
+psycopg2-binary  # Si tu utilises PostgreSQL comme base de données de destination
+pandas==1.5.3    # Pour manipuler les données facilement
+
 python-dotenv
