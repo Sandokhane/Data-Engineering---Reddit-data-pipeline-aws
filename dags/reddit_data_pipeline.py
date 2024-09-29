@@ -19,7 +19,7 @@ def extract_reddit_data(**kwargs):
     )
 
     # Exemple : Récupérer les 50 derniers posts du subreddit "dataengineering"
-    subreddit = reddit.subreddit('calisthenics')
+    subreddit = reddit.subreddit('python')
     posts = []
     for submission in subreddit.hot(limit=50):
         posts.append({
@@ -36,15 +36,14 @@ def extract_reddit_data(**kwargs):
 
     # Sauvegarder les posts dans un fichier CSV
     df = pd.DataFrame(posts)
-    output_path = '/tmp/reddit_posts.csv'
-    df.to_csv(output_path, index=False)
-    print(f"Les données ont été sauvegardées dans {output_path}")
+    df.to_csv('/home/bassam/reddit_data_pipeline/data/reddit_posts.csv', index=False)
+    print(f"Les données ont été sauvegardées dans le répertoire data")
 
 # Définition des arguments par défaut du DAG
 default_args = {
     'owner': 'Sandokhane',
     'depends_on_past': False,
-    'start_date': datetime(2023, 1, 1),
+    'start_date': datetime(2024, 8, 1),
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 3,
