@@ -1,69 +1,60 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime, timedelta
+from airflow.utils.dates import days_ago
+from utils.s3_upload import upload_to_s3
 import praw
-from dotenv import load_dotenv
 import os
-import pandas as pd  # Ajout de pandas pour gérer les fichiers CSV
+import pandas as pd
+from dotenv import load_dotenv
 
-# Charger les variables d'environnement depuis le fichier .env
+# Charger les variables d'environnement
 load_dotenv()
 
-# Fonction pour extraire les données de Reddit
+# Configurer l'API Reddit avec PRAW
 def extract_reddit_data(**kwargs):
-    # Initialiser la connexion Reddit en utilisant les variables d'environnement
     reddit = praw.Reddit(
         client_id=os.getenv('REDDIT_CLIENT_ID'),
         client_secret=os.getenv('REDDIT_CLIENT_SECRET'),
         user_agent=os.getenv('REDDIT_USER_AGENT')
     )
-
-    # Exemple : Récupérer les 50 derniers posts du subreddit "dataengineering"
-    subreddit = reddit.subreddit('python')
+    
+    subreddit = reddit.subreddit('muaythai')
     posts = []
+    
     for submission in subreddit.hot(limit=50):
-        posts.append({
-            'title': submission.title,
-            'score': submission.score,
-            'url': submission.url,
-            'num_comments': submission.num_comments,  # Nombre de commentaires
-            'created': datetime.fromtimestamp(submission.created),  # Date de création du post
-        })
+        posts.append([submission.title, submission.score, submission.url])
+    
+    # Convertir les posts en DataFrame
+    posts_df = pd.DataFrame(posts, columns=['Title', 'Score', 'URL'])
+    
+    # Définir le chemin vers le dossier `data`
+    file_path = os.path.join(os.getcwd(), 'data/muay_thai_reddit_posts.csv')
+    
+    # Sauvegarder les données dans un fichier CSV dans le dossier `data`
+    posts_df.to_csv(file_path, index=False)
+    
+    # Upload le fichier CSV sur S3
+    upload_to_s3(file_path, os.getenv('S3_BUCKET_NAME'), 'muay_thai_reddit_posts.csv')
+    print(f"Données sauvegardées dans {file_path} et uploadées sur S3 avec succès")
 
-    # Log des données récupérées
-    for post in posts:
-        print(f"Title: {post['title']}, Score: {post['score']}, URL: {post['url']}")
-
-    # Sauvegarder les posts dans un fichier CSV
-    df = pd.DataFrame(posts)
-    df.to_csv('/home/bassam/reddit_data_pipeline/data/reddit_posts.csv', index=False)
-    print(f"Les données ont été sauvegardées dans le répertoire data")
-
-# Définition des arguments par défaut du DAG
+# Configurer le DAG
 default_args = {
     'owner': 'Sandokhane',
-    'depends_on_past': False,
-    'start_date': datetime(2024, 8, 1),
-    'email_on_failure': False,
-    'email_on_retry': False,
-    'retries': 3,
-    'retry_delay': timedelta(minutes=5),
+    'start_date': days_ago(1),
 }
 
-# Définition du DAG
-dag = DAG(
+with DAG(
     'reddit_data_pipeline',
     default_args=default_args,
-    description='Un DAG pour extraire des données de Reddit',
-    schedule_interval=timedelta(days=1),  # Exécution quotidienne
-)
+    schedule_interval='@daily',
+    catchup=False
+) as dag:
+    
+    # Tâche d'extraction des données Reddit
+    extract_task = PythonOperator(
+        task_id='extract_reddit_data',
+        python_callable=extract_reddit_data,
+        provide_context=True
+    )
 
-# Tâche Python pour extraire les données de Reddit
-extract_task = PythonOperator(
-    task_id='extract_reddit_data',
-    python_callable=extract_reddit_data,
-    dag=dag,
-)
-
-# Définir l'ordre des tâches (dans cet exemple, il n'y a qu'une tâche pour l'instant)
-extract_task
+    extract_task
