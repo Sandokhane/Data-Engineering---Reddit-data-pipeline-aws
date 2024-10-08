@@ -77,10 +77,15 @@ def extract_reddit_data(subreddit_name, limit=50):
 if __name__ == "__main__":
     # Paramètres
     subreddit_name = 'muaythai'  # On récupère les posts du subreddit muaythai
-    limit = 50  # Nombre de posts à récupérer
+    limit = 250  # Nombre de posts à récupérer
 
     # Étape 1 : Extraire les données de Reddit et les sauvegarder en CSV
     csv_file = extract_reddit_data(subreddit_name, limit)
 
+
     # Étape 2 : Uploader le fichier CSV dans le bucket S3
-    upload_to_s3(csv_file, AWS_BUCKET_NAME, f"reddit/{csv_file}")
+    upload_to_s3(csv_file, AWS_BUCKET_NAME, f"raw_data/{csv_file}")
+
+
+   
+
