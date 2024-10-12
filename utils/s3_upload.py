@@ -3,20 +3,21 @@ import os
 import csv
 import praw
 from dotenv import load_dotenv
+import logging
+
+# Initialiser les Logs
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
 
 
 # Charger les variables d'environnement depuis le fichier .env
 load_dotenv()
 
-# Charger les credentials AWS depuis le fichier .env
-AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_BUCKET_NAME = os.getenv('S3_BUCKET_NAME')
+# Charger les credentials AWS depuis le fichier .
+# AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY_ID')
+# AWS_SECRET_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_BUCKET_NAME = os.getenv('S3_BUCKET_RAW')
 
-# Credentials Reddit
-REDDIT_CLIENT_ID = os.getenv('REDDIT_CLIENT_ID')
-REDDIT_SECRET = os.getenv('REDDIT_CLIENT_SECRET')
-REDDIT_USER_AGENT = os.getenv('REDDIT_USER_AGENT')
 
 
 # Fonction pour uploader un fichier sur S3
@@ -29,62 +30,36 @@ def upload_to_s3(file_name, bucket, object_name=None):
     """
     # Si aucun nom d'objet n'est fourni, utiliser le nom du fichier
     if object_name is None:
-        object_name = file_name
+        object_name = os.path.basename(file_name)
 
     # Initialiser la connexion S3
-    s3_client = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY)
+    s3_client = boto3.client('s3')
 
     try:
         s3_client.upload_file(file_name, bucket, object_name)
         print(f"Fichier {file_name} uploadé avec succès dans {bucket}/{object_name}")
+
+    except boto3.exceptions.S3UploadFailedError as e:
+        logger.error(f"Ereur lors de l'upload vers S3: {e}")
     except Exception as e:
-        print(f"Erreur lors de l'upload du fichier {file_name} : {e}")
+        logger.error(f"Erreur inattendue : {e}")
 
 
-# Fonction pour extraire des données de Reddit
-def extract_reddit_data(subreddit_name, limit=50):
-    """Récupérer les posts d'un subreddit et les sauvegarder en fichier CSV."""
-    
-    # Initialiser l'API Reddit avec PRAW
-    reddit = praw.Reddit(
-        client_id=REDDIT_CLIENT_ID,
-        client_secret=REDDIT_SECRET,
-        user_agent=REDDIT_USER_AGENT
-    )
-
-    # Sélectionner le subreddit
-    subreddit = reddit.subreddit(subreddit_name)
-
-    # Liste pour stocker les posts
-    posts = []
-
-    # Extraire les données (limite de posts définie par 'limit')
-    for submission in subreddit.hot(limit=limit):
-        posts.append([submission.title, submission.score, submission.url])
-
-    # Sauvegarder les données dans un fichier CSV
-    csv_file = f"{subreddit_name}_posts.csv"
-    with open(csv_file, mode='w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        writer.writerow(["Title", "Score", "URL"])
-        writer.writerows(posts)
-    
-    print(f"Les données Reddit ont été sauvegardées dans {csv_file}")
-    
-    return csv_file
 
 
 if __name__ == "__main__":
-    # Paramètres
-    subreddit_name = 'muaythai'  # On récupère les posts du subreddit muaythai
-    limit = 250  # Nombre de posts à récupérer
+    csv_file = os.path.join(os.getcwd(), 'data/muay_thai_reddit_posts_raw.csv')
 
-    # Étape 1 : Extraire les données de Reddit et les sauvegarder en CSV
-    csv_file = extract_reddit_data(subreddit_name, limit)
+    # Nom du Bucket
+    bucket_name = AWS_BUCKET_NAME
 
 
-    # Étape 2 : Uploader le fichier CSV dans le bucket S3
-    upload_to_s3(csv_file, AWS_BUCKET_NAME, f"raw_data/{csv_file}")
+    # Construire le chemin dans S3 sous un dossier "raw"
+    # Construire le chemin dans S3 sous le dossier "raw_data"
+    s3_path = f"raw_data/{os.path.basename(csv_file)}"
+
+    # Uploader le fichier dans S3 sous le chemin raw_data/
+    upload_to_s3(csv_file, bucket_name, s3_path)
 
 
    
