@@ -13,15 +13,11 @@ logger = logging.getLogger()
 # Charger les variables d'environnement depuis le fichier .env
 load_dotenv()
 
-# Charger les credentials AWS depuis le fichier .env
+# Charger les credentials AWS depuis le fichier .
 # AWS_ACCESS_KEY = os.getenv('AWS_ACCESS_KEY_ID')
 # AWS_SECRET_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_BUCKET_NAME = os.getenv('S3_BUCKET_RAW')
 
-# Credentials Reddit
-# REDDIT_CLIENT_ID = os.getenv('REDDIT_CLIENT_ID')
-# REDDIT_SECRET = os.getenv('REDDIT_CLIENT_SECRET')
-# REDDIT_USER_AGENT = os.getenv('REDDIT_USER_AGENT')
 
 
 # Fonction pour uploader un fichier sur S3
@@ -42,6 +38,7 @@ def upload_to_s3(file_name, bucket, object_name=None):
     try:
         s3_client.upload_file(file_name, bucket, object_name)
         print(f"Fichier {file_name} uploadé avec succès dans {bucket}/{object_name}")
+
     except boto3.exceptions.S3UploadFailedError as e:
         logger.error(f"Ereur lors de l'upload vers S3: {e}")
     except Exception as e:
@@ -63,6 +60,7 @@ if __name__ == "__main__":
 
     # Uploader le fichier dans S3 sous le chemin raw_data/
     upload_to_s3(csv_file, bucket_name, s3_path)
+
 
    
 
