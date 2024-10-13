@@ -4,24 +4,25 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + '/../'))
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime, timedelta
+from airflow.utils.dates import days_ago
+from utils.s3_upload import upload_to_s3
 import praw
 from dotenv import load_dotenv
 import pandas as pd
 from utils.s3_upload import upload_to_s3  # Import de votre module s3_upload.py
 
 
-# Charger les variables d'environnement depuis le fichier .env
+# Charger les variables d'environnement
 load_dotenv()
 
-# Fonction pour extraire les données de Reddit
+# Configurer l'API Reddit avec PRAW
 def extract_reddit_data(**kwargs):
-    # Initialiser la connexion Reddit en utilisant les variables d'environnement
     reddit = praw.Reddit(
         client_id=os.getenv('REDDIT_CLIENT_ID'),
         client_secret=os.getenv('REDDIT_CLIENT_SECRET'),
         user_agent=os.getenv('REDDIT_USER_AGENT')
     )
+
 
     # Boucle pour parcourir les 50 posts les plus "hot"
     subreddit = reddit.subreddit('muaythai')
@@ -85,5 +86,5 @@ extract_task = PythonOperator(
     dag=dag,
 )
 
-# Définir l'ordre des tâches (dans cet exemple, il n'y a qu'une tâche pour l'instant)
-extract_task
+
+    extract_task
