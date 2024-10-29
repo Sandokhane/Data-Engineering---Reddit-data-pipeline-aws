@@ -9,11 +9,12 @@ The pipeline is designed to:
 Extract data from Reddit using its API. Store the raw data into an S3 bucket from Airflow. Transform the data using AWS Glue and Amazon Athena. Load the transformed data into Amazon Redshift for analytics and querying.
 
 
-![image](https://github.com/user-attachments/assets/cfd753ef-e419-4724-a0af-82a232ccd7c2)
+![blank diagram - copy 1](https://github.com/user-attachments/assets/190a3039-219a-4739-9c86-90827b45b8a0)
 
 
 
-1. 	Reddit API: Source of the data.
+
+1. Reddit API: Source of the data.
 2.	Apache Airflow & Celery: Orchestrates the ETL process and manages task distribution.
 3.	PostgreSQL: Temporary storage and metadata management.
 4.	Amazon S3: Raw data storage.
