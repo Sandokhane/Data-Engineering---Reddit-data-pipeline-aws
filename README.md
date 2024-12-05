@@ -8,8 +8,8 @@ The pipeline is designed to:
 
 Extract data from Reddit using its API. Store the raw data into an S3 bucket from Airflow. Transform the data using AWS Glue and Amazon Athena. Load the transformed data into Amazon Redshift for analytics and querying.
 
+![img Architecture 2](https://github.com/user-attachments/assets/05769379-9ab6-43a1-8a13-bf286ddfbe70)
 
-![img Architecture 2](https://github.com/user-attachments/assets/6932e051-ef65-4759-b4e4-11b281c7be58)
 
 For the architecture diagram we've used the following website to build it [Excalidraw](https://excalidraw.com/)
 
